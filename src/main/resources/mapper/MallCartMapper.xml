@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bee.cart.mapper.MallCartMapper">
+  <resultMap id="BaseResultMap" type="com.bee.cart.pojo.MallCart">
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="user_id" jdbcType="INTEGER" property="userId" />
+    <result column="product_id" jdbcType="INTEGER" property="productId" />
+    <result column="quantity" jdbcType="INTEGER" property="quantity" />
+    <result column="checked" jdbcType="INTEGER" property="checked" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
+  </resultMap>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from mall_cart
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.bee.cart.pojo.MallCart">
+    insert into mall_cart (id, user_id, product_id, 
+      quantity, checked, create_time, 
+      update_time)
+    values (#{id,jdbcType=INTEGER}, #{userId,jdbcType=INTEGER}, #{productId,jdbcType=INTEGER}, 
+      #{quantity,jdbcType=INTEGER}, #{checked,jdbcType=INTEGER}, #{createTime,jdbcType=TIMESTAMP}, 
+      #{updateTime,jdbcType=TIMESTAMP})
+  </insert>
+  <update id="updateByPrimaryKey" parameterType="com.bee.cart.pojo.MallCart">
+    update mall_cart
+    set user_id = #{userId,jdbcType=INTEGER},
+      product_id = #{productId,jdbcType=INTEGER},
+      quantity = #{quantity,jdbcType=INTEGER},
+      checked = #{checked,jdbcType=INTEGER},
+      create_time = #{createTime,jdbcType=TIMESTAMP},
+      update_time = #{updateTime,jdbcType=TIMESTAMP}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  
+   <update id="updateByPrimaryKeySelective" parameterType="com.bee.cart.pojo.MallCart" >
+    update mall_cart
+    <set >
+      <if test="userId != null" >
+        user_id = #{userId,jdbcType=INTEGER},
+      </if>
+      <if test="productId != null" >
+        product_id = #{productId,jdbcType=INTEGER},
+      </if>
+      <if test="quantity != null" >
+        quantity = #{quantity,jdbcType=INTEGER},
+      </if>
+      <if test="checked != null" >
+        checked = #{checked,jdbcType=INTEGER},
+      </if>
+      <if test="createTime != null" >
+        create_time = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateTime != null" >
+        update_time = now(),
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  
+  
+  
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    select id, user_id, product_id, quantity, checked, create_time, update_time
+    from mall_cart
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <select id="selectAll" resultMap="BaseResultMap">
+    select id, user_id, product_id, quantity, checked, create_time, update_time
+    from mall_cart
+  </select>
+  
+  <select id="selectCartByUserIdProductId" parameterType="map" resultMap="BaseResultMap">
+    select id, user_id, product_id, quantity, checked, create_time, update_time
+    from mall_cart where user_id = #{userId} and product_id = #{productId}
+  </select>
+  
+   <select id="selectCartByUserId" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    select id, user_id, product_id, quantity, checked, create_time, update_time
+    from mall_cart where user_id = #{userId}
+  </select>
+  
+   <select id="selectCartProductCheckedStatusByUserId" resultType="int" parameterType="int">
+    select count(1) from mall_cart where checked = 0 and user_id = #{userId}
+  </select>
+  
+  
+  <select id="selectCartByProductId"  parameterType="java.lang.Integer" resultMap="BaseResultMap" >
+    select id, user_id, product_id, quantity, checked, create_time, update_time
+    from mall_cart where product_id = #{productId}
+  </select>
+  
+  <delete id="deleteByUserIdProductIds" parameterType="map">
+    delete from mall_cart where user_id = #{userId}
+    <if test="productIdList != null">
+      and product_id in
+      <foreach collection="productIdList" item="item" open="(" close=")" separator=",">
+         #{item}
+      </foreach> 
+    </if>  
+  </delete>
+  
+  <update id="checkedOrUnchecked" parameterType="map" >
+     update mall_cart
+     set checked = #{checked},
+     update_time = now()
+     where user_id = #{userId}
+     <if test="productId != null">
+       and product_id = #{productId}
+     </if>
+  </update>
+  
+  <select id="selectCartProductCount" parameterType="int" resultType="int">
+    select IFNULL(sum(quantity),0) as count from mall_cart where user_id = #{userId}
+  </select>
+  
+</mapper>
